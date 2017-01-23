@@ -1,5 +1,35 @@
 # deployment bot thing - GraphQL-API
 
+## Architecture
+
+```
++------------------+                              +---------------------+
+|                  |                              |                     |
+| GIT              |    on deployment hook        | API                 |      read
+| * config         +------------------------------> * create deployment <---------------+
+|   * environments |                              | * watch deployment  |               |
+|   * trigger      |                              |                     |               |
+| * scripts to run |                              +-----+---------------+               |
+|                  |                                    |                               |
++------------------+                                    |                        +------+-------+
+                                                        |                        |              |
+                                                        |                        |  ELK Logging |
+                                                        |start/watch             |              |
+                                                        |                        +------^-------+
+                                                        |                               |
+                                                        |                               |
+                                                        |                               |
+                                                  +-----v---------------------------+   |write
+                                                  |                                 |   |
+                                                  | Deployment Runner               |   |
+                                                  | * has access to git             |   |
+                                                  | * has access to build artifacts +---+
+                                                  | * runs deployment scripts       |
+                                                  | * knows hosts to deploy to      |
+                                                  |                                 |
+                                                  +---------------------------------+
+```
+
 ## GraphQL Schema
 ```js
 const typeDefinitions = `
