@@ -17,7 +17,7 @@ info:
 
 responses:
   errorNotFound:
-    description: Error
+    description: Error Not Found
     headers:
       X-Request-Id:
         description: The request id this is a response to
@@ -51,6 +51,24 @@ parameters:
     
 paths:
   /stacks:
+    parameters:
+      - $ref: "#/parameters/requestId"
+    get:
+      operationId: findStacks
+      responses:
+        200:
+          description: List all known `Stack` names.
+          headers:
+            X-Request-Id:
+              description: The request id this is a response to
+              type: string
+          schema:
+            type: array
+            items:
+              type: string
+              description: Name of a stack
+        default:
+          $ref: "#/responses/errorResponse"
     post:
       description: Creates `Stack` object.
       parameters:
@@ -63,6 +81,16 @@ paths:
           schema:
             $ref: '#/definitions/stack'
       responses:
+        201:
+          description: stack was added
+          headers:
+            Location:
+              description: The location to get the newly added stack
+              type: string
+              format: uri
+            X-Request-Id:
+              description: The request id this is a response to
+              type: string
         default:
           $ref: '#/responses/errorNotFound'
   /stacks/{name}:
