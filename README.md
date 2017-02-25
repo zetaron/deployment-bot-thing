@@ -28,7 +28,7 @@ Graph drawn using: [http://asciiflow.com/](http://asciiflow.com/)
 
 ## MVP API
 ### OpenAPI spec
-Checkout the `swagger/swagger.yml`
+Checkout the `swagger/swagger.yaml`
 
 ### Tools
 - [go-openapi](https://github.com/go-openapi)
