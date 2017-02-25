@@ -1,0 +1,172 @@
+swagger: '2.0'
+
+produces:
+- application/json
+
+schemes:
+- http
+
+consumes:
+- application/json
+
+info:
+  version: "0.0.1"
+  title: MVP - Docker Stack Deployment API
+  description: |
+    A very small and simple API to trigger deployments of your docker stacks onto a preconfigured docker swarm.
+
+responses:
+  errorNotFound:
+    description: Error
+    headers:
+      X-Request-Id:
+        description: The request id this is a response to
+        type: string
+    schema:
+      $ref: '#/definitions/error'
+  errorResponse:
+    description: Error
+    headers:
+      X-Request-Id:
+        description: The request id this is a response to
+        type: string
+    schema:
+      $ref: '#/definitions/error'
+      
+parameters:
+  requestId:
+    name: X-Request-Id
+    description: A unique UUID for the request
+    in: header
+    type: string
+    required: false
+    minLength: 1
+  stackName:
+    name: name
+    description: The name for a given stack
+    in: path
+    type: string
+    required: true
+    minLength: 1
+    
+paths:
+  /stacks:
+    post:
+      description: Creates `Stack` object.
+      parameters:
+        -
+          name: body
+          in: body
+          description: |
+            `Stack` object to be added.
+          required: true
+          schema:
+            $ref: '#/definitions/stack'
+      responses:
+        default:
+          $ref: '#/responses/errorNotFound'
+  /stacks/{name}:
+    parameters:
+      - $ref: '#/parameters/requestId'
+      - $ref: '#/parameters/stackName'
+    put:
+      operationId: updateStack
+      responses:
+        204:
+          description: stack was updated
+          headers:
+            X-Request-Id:
+              description: The request id this is a response to
+              type: string
+        404:
+          $ref: '#/responses/errorNotFound'
+        default:
+          $ref: '#/responses/errorResponse'
+    get:
+      operationId: getStack
+      responses:
+        200:
+          description: stack was found
+          headers:
+            X-Request-Id:
+              description: The request id this is a response to
+              type: string
+        404:
+          $ref: '#/responses/errorNotFound'
+        default:
+          $ref: '#/responses/errorResponse'
+    delete:
+      operationId: deleteStack
+      responses:
+        204:
+          description: the delete was successful
+          headers:
+            X-Request-Id:
+              description: The request id this is a response to
+              type: string
+        default:
+          $ref: '#/responses/errorResponse'
+  /stacks/{name}/deploy:
+    parameters:
+      - $ref: '#/parameters/requestId'
+      - $ref: '#/parameters/stackName'
+    put:
+      operationId: putDeployment
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/deployment'
+      responses:
+        201:
+          description: deployment was created
+          headers:
+            X-Request-Id:
+              description: The request id this is a response to
+              type: string
+        404:
+          $ref: '#/responses/errorNotFound'
+        default:
+          $ref: '#/responses/errorResponse'
+          
+definitions:
+  deployment:
+    type: object
+    properties:
+      commit:
+        type: string
+        description: The id of the git commit to deploy
+  stack:
+    type: object
+    properties:
+      repository:
+        type: string
+        description: |
+          url to the git repository
+          eg. git@github.com:zetaron/deployment-bot-thing.git
+      name:
+        type: string
+        description: |
+          url friendly stack name also used for `docker stack deploy`
+  error:
+    type: object
+    description: |
+      The error model is a model for all the error responses coming from the docker stack deployment API
+    required:
+      - message
+      - code
+    properties:
+      code:
+        type: integer
+        format: int64
+        description: The error code
+      message:
+        type: string
+        description: The error message
+      helpUrl:
+        type: string
+        format: url
+        description: link to help page explaining the error in more detail
+      cause:
+        $ref: '#/definitions/error'
